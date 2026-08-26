@@ -1,0 +1,370 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  RECRUITER
+  EMPLOYEE
+  INTERN
+}
+
+enum JobStatus {
+  OPEN
+  CLOSED
+  DRAFT
+}
+
+enum ApplicationStage {
+  APPLIED
+  SCREENING
+  INTERVIEW
+  OFFER
+  HIRED
+  REJECTED
+}
+
+enum EmployeeType {
+  INTERN
+  FULL_TIME
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  COMPLETED
+  EXTENDED
+}
+
+enum AssignmentStatus {
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  employee        Employee?
+  interviews      Interview[]      @relation("Interviewer")
+  posts           Post[]
+  comments        Comment[]
+  likes           Like[]
+  lessonProgress  LessonProgress[]
+  attempts        Attempt[]
+  userBadges      UserBadge[]
+  assignments     Assignment[]
+
+  @@index([role])
+}
+
+model Job {
+  id          String    @id @default(cuid())
+  title       String
+  description String    @db.Text
+  status      JobStatus @default(DRAFT)
+  openings    Int       @default(1)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  applications Application[]
+
+  @@index([status])
+}
+
+model Candidate {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  resumeUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  applications Application[]
+
+  @@index([email])
+}
+
+model Application {
+  id          String            @id @default(cuid())
+  candidateId String
+  jobId       String
+  stage       ApplicationStage  @default(APPLIED)
+  feedback    String?           @db.Text
+  appliedAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  candidate  Candidate   @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  job        Job         @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  interviews Interview[]
+  employee   Employee?
+
+  @@index([jobId])
+  @@index([candidateId])
+  @@index([stage])
+}
+
+model Interview {
+  id            String   @id @default(cuid())
+  applicationId String
+  scheduledAt   DateTime
+  interviewerId String
+  notes         String?  @db.Text
+  rating        Int?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  interviewer User        @relation("Interviewer", fields: [interviewerId], references: [id])
+
+  @@index([applicationId])
+}
+
+model Employee {
+  id                String         @id @default(cuid())
+  userId            String         @unique
+  applicationId     String?        @unique
+  joinDate          DateTime       @default(now())
+  mentorId          String?
+  type              EmployeeType
+  status            EmployeeStatus @default(ACTIVE)
+  internStartDate   DateTime?
+  internEndDate     DateTime?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  application Application? @relation(fields: [applicationId], references: [id])
+  mentor      Employee?    @relation("Mentorship", fields: [mentorId], references: [id])
+  mentees     Employee[]   @relation("Mentorship")
+
+  @@index([status])
+  @@index([type])
+}
+
+model Course {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @db.Text
+  published   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  modules     CourseModule[]
+  exams       Exam[]
+  assignments Assignment[]
+
+  @@index([published])
+}
+
+model CourseModule {
+  id           String @id @default(cuid())
+  courseId     String
+  title        String
+  description  String? @db.Text
+  displayOrder Int    @default(0)
+
+  course  Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons Lesson[]
+
+  @@index([courseId])
+}
+
+model Lesson {
+  id           String   @id @default(cuid())
+  moduleId     String
+  title        String
+  content      String?  @db.Text
+  materialUrl  String?
+  externalUrl  String?
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  module   CourseModule      @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  progress LessonProgress[]
+
+  @@index([moduleId])
+}
+
+model LessonProgress {
+  id          String    @id @default(cuid())
+  lessonId    String
+  userId      String
+  completed   Boolean   @default(false)
+  completedAt DateTime?
+
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([lessonId, userId])
+  @@index([userId])
+}
+
+model Assignment {
+  id             String           @id @default(cuid())
+  courseId       String
+  userId         String
+  status         AssignmentStatus @default(ASSIGNED)
+  assignedAt     DateTime         @default(now())
+  startedAt      DateTime?
+  completionDate DateTime?
+
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([courseId, userId])
+  @@index([userId])
+  @@index([status])
+}
+
+model Exam {
+  id                String   @id @default(cuid())
+  courseId          String
+  title             String
+  description       String?  @db.Text
+  passingPercentage Int      @default(60)
+  active            Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  course    Course     @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  questions Question[]
+  attempts  Attempt[]
+
+  @@index([courseId])
+}
+
+model Question {
+  id           String @id @default(cuid())
+  examId       String
+  questionText String
+  marks        Int    @default(1)
+  displayOrder Int    @default(0)
+
+  exam    Exam             @relation(fields: [examId], references: [id], onDelete: Cascade)
+  options QuestionOption[]
+  answers AttemptAnswer[]
+
+  @@index([examId])
+}
+
+model QuestionOption {
+  id         String  @id @default(cuid())
+  questionId String
+  optionText String
+  isCorrect  Boolean @default(false)
+
+  question Question        @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answers  AttemptAnswer[]
+
+  @@index([questionId])
+}
+
+model Attempt {
+  id          String    @id @default(cuid())
+  examId      String
+  userId      String
+  score       Int       @default(0)
+  percentage  Float     @default(0)
+  passed      Boolean   @default(false)
+  startedAt   DateTime  @default(now())
+  submittedAt DateTime?
+
+  exam    Exam            @relation(fields: [examId], references: [id], onDelete: Cascade)
+  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answers AttemptAnswer[]
+
+  @@index([userId])
+  @@index([examId])
+}
+
+model AttemptAnswer {
+  id               String  @id @default(cuid())
+  attemptId        String
+  questionId       String
+  selectedOptionId String?
+
+  attempt        Attempt         @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question       Question        @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  selectedOption QuestionOption? @relation(fields: [selectedOptionId], references: [id])
+
+  @@unique([attemptId, questionId])
+}
+
+model Badge {
+  id          String   @id @default(cuid())
+  name        String
+  description String   @db.Text
+  icon        String   @default("award")
+  criteria    String   @db.Text
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userBadges UserBadge[]
+}
+
+model UserBadge {
+  id         String   @id @default(cuid())
+  badgeId    String
+  userId     String
+  awardedAt  DateTime @default(now())
+
+  badge Badge @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([badgeId, userId])
+  @@index([userId])
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  authorId  String
+  body      String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author   User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comments Comment[]
+  likes    Like[]
+
+  @@index([createdAt])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  postId    String
+  authorId  String
+  body      String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  post   Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+}
+
+model Like {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+}
