@@ -1,183 +1,267 @@
 # EmpForge
 
-EmpForge is an internal employee-lifecycle platform: recruitment, intern onboarding,
-courses & trainings, assignments & exams, badges, and an internal community feed —
-all in one Next.js app backed by MySQL.
+> A full-stack employee lifecycle management platform for recruitment, onboarding, training, assessments, badges, and internal community engagement.
+
+EmpForge is an internal employee-lifecycle platform that brings **recruitment, intern onboarding, courses and training, assignments, exams, badges, and an internal community feed** into a single Next.js application backed by MySQL.
+
 
 ## Features
 
-- **Recruitment** — job postings, a public application form with resume upload, a
-  Kanban-style pipeline (Applied → Screening → Interview → Offer → Hired), interview
-  scheduling and feedback.
-- **Intern onboarding** — convert a hired candidate into an Employee/Intern record,
-  assign a mentor, track roster status.
-- **Courses & trainings** — course/module/lesson builder, publish/unpublish, lesson
-  completion with live progress bars.
-- **Assignments & exams** — assign courses to one or many people, an MCQ exam builder,
-  and exam-taking with **server-side scoring only** (the client never sends a score).
-- **Badges** — auto-awarded server-side when a linked exam is passed or course is
-  completed, with duplicate-award prevention.
-- **Community** — a simple internal feed with posts, likes (no duplicate likes), and
-  comments (delete your own, or any as admin).
-- Role-based access control (ADMIN / RECRUITER / EMPLOYEE / INTERN) enforced in every
-  API route, not just hidden in the UI.
+### Recruitment
+- Create and manage job postings.
+- Public job application form with resume upload.
+- Track candidates through a Kanban-style recruitment pipeline:
+  - Applied
+  - Screening
+  - Interview
+  - Offer
+  - Hired
+- Schedule interviews.
+- Record interview feedback.
+- Convert hired candidates into employees or interns.
 
-## Tech stack
+### Intern & Employee Onboarding
+- Convert hired candidates into Employee/Intern records.
+- Assign mentors.
+- Track employee and intern roster status.
+- Role-based access to employee functionality.
 
-- Next.js 14 (App Router) + TypeScript + React
-- Tailwind CSS, hand-built shadcn-style UI primitives
-- MySQL + Prisma ORM
-- NextAuth (Auth.js) with credentials + bcrypt password hashing
-- React Hook Form + Zod validation (client and server)
-- Vitest for business-logic tests
+### Courses & Training
+- Create courses, modules, and lessons.
+- Publish or unpublish courses.
+- Assign training to employees or interns.
+- Track lesson completion.
+- Display live course progress.
+
+### Assignments & Exams
+- Assign courses to one or multiple users.
+- Create MCQ-based exams.
+- Allow employees and interns to take assigned exams.
+- Calculate exam scores securely on the server.
+- Prevent clients from manipulating scores or pass/fail status.
+
+### Badges
+- Automatically award badges when users:
+  - Pass a linked exam.
+  - Complete a required course.
+- Prevent duplicate badge awards using server-side validation and database constraints.
+
+### Community
+- Internal community feed.
+- Create posts.
+- Like posts.
+- Prevent duplicate likes.
+- Add comments.
+- Users can delete their own comments.
+- Administrators can moderate comments.
+
+### Role-Based Access Control
+
+The application supports four roles:
+
+- **ADMIN**
+- **RECRUITER**
+- **EMPLOYEE**
+- **INTERN**
+
+Permissions are enforced on the server for every protected API operation.
+
+The UI hides unauthorized features for a better user experience, but the actual security boundary is enforced through server-side authorization.
+
+
+## Tech Stack
+
+ Technology             Purpose 
+
+ Next.js 14          Full-stack web framework 
+ React               Frontend UI 
+ TypeScript          Type-safe development 
+ Tailwind CSS        Styling 
+ Prisma ORM          Database access 
+ MySQL               Relational database 
+ NextAuth / Auth.js  Authentication 
+ bcrypt              Password hashing 
+ React Hook Form     Form management 
+ Zod                 Client and server validation 
+ Vitest              Business-logic testing 
+
+
+## Architecture
+
+``
+                    ┌─────────────────────┐
+                    │      Users          │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │   Next.js / React   │
+                    │    App Router       │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │   API Route         │
+                    │   Handlers          │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │   Validation &      │
+                    │ Authorization       │
+                    │  Zod / Auth.js      │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │   Service Layer     │
+                    │ Business Logic      │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │    Prisma ORM       │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │       MySQL         │
+                    └─────────────────────┘
 
 ## Requirements
 
-- Node.js 20+
-- A MySQL database (local, Docker, or a hosted instance like PlanetScale/Railway)
+Before running the project, make sure you have:
 
-## Installation
+- Node.js 20 or later
+- npm
+- MySQL database
 
-```bash
-npm install
-cp .env.example .env
-# edit .env with your DATABASE_URL and a random AUTH_SECRET
-```
+The MySQL database can be:
 
-Generate a secret quickly with `openssl rand -base64 32`.
+- Local MySQL
+- Docker
+- PlanetScale
+- Railway
+- AWS RDS
+- Any compatible hosted MySQL provider
 
-## Database setup
+## Demo Accounts
 
-```bash
-npx prisma migrate dev --name init
-npx prisma db seed
-```
+The following accounts are available for testing the application:
 
-This creates all tables and seeds demo data (jobs, candidates, a course with modules
-and lessons, an exam with questions, two badges, and a sample community post).
+Role                 Email                  Password 
 
-### Demo accounts (seeded, password: `password123`)
+Admin         admin@empforge.dev           password123 
+Recruiter     recruiter@empforge.dev       password123 
+Employee      employee@empforge.dev        password123 
+Intern        intern@empforge.dev          password123 
 
-| Role      | Email                    |
-|-----------|---------------------------|
-| Admin     | admin@empforge.dev       |
-| Recruiter | recruiter@empforge.dev   |
-| Employee  | employee@empforge.dev    |
-| Intern    | intern@empforge.dev      |
+> These are demo accounts intended only for testing the application. Do not use these credentials in production.
 
-## Development
+##Role Permissions
 
-```bash
-npm run dev
-```
+###ADMIN
 
-Visit `http://localhost:3000`. The homepage lists open jobs publicly; sign in at
-`/login` to reach the dashboard.
+Full access to:
 
-## Testing
+Users
+Jobs
+Candidates
+Employees
+Courses
+Assignments
+Exams
+Badges
+Reports
+Community moderation
 
-```bash
-npm run test
-```
+###RECRUITER
 
-Covers exam scoring (including that a client-supplied score/passed flag can never
-override the server calculation), badge eligibility and duplicate-award prevention,
-recruitment stage transitions, course progress calculation, and duplicate-like /
-comment-ownership rules.
+Can manage:
 
-## Production build
+Job postings
+Applications
+Candidate pipeline
+Interviews
+Candidate conversion to employee/intern
 
-```bash
-npm run build
-npm run start
-```
+###EMPLOYEE
 
-Before shipping, also run:
+Can access:
 
-```bash
-npm run lint
-npx tsc --noEmit
-npx prisma validate
-```
+Published courses
+Assigned training
+Exams
+Results
+Badges
+Community
+INTERN
 
-## Project structure
+Can access:
 
-```
-src/
-  app/
-    (auth)/login/          public login page
-    (protected)/           everything behind auth: dashboard, jobs, candidates,
-                            applications, interviews, employees, courses,
-                            assignments, exams, badges, community
-    careers/[id]/           public job application page
-    api/                    route handlers, one folder per resource
-  components/
-    ui/                     button, input, table, dialog, toast, etc.
-    layout/                 sidebar, navbar, page header
-  lib/
-    auth.ts                 NextAuth config
-    db.ts                   Prisma client singleton
-    permissions.ts          requireUser / requireRole guards used in every API route
-    storage.ts               local file storage abstraction (swap for S3 later)
-  services/                 business logic: recruitment, onboarding, courses,
-                             exams, badges, community
-  validations/               Zod schemas shared by forms and API routes
-prisma/
-  schema.prisma
-  seed.ts
-tests/                      Vitest specs for the services above
-```
+Assigned training
+Exams
+Results
+Badges
+Community
 
-## Role permissions
+All protected write operations are re-validated on the server using the authorization utilities in:
 
-- **ADMIN** — full access: users where applicable, jobs, candidates, employees,
-  courses, assignments, exams, badges, reports, content moderation.
-- **RECRUITER** — job postings, applications, pipeline, interviews, candidate
-  conversion to employee/intern.
-- **EMPLOYEE** — published courses, assigned training, exams, results, badges,
-  community posting.
-- **INTERN** — same learner-side access as Employee (assigned training, exams,
-  results, badges, community).
+src/lib/permissions.ts
 
-Every write operation is re-checked server-side via `requireRole`/`requireUser` in
-`src/lib/permissions.ts` — the sidebar hides links per role, but that's a UX nicety,
-not the security boundary.
+##Security
 
-## Security notes
+EmpForge implements several server-side security measures.
 
-- Passwords are hashed with bcrypt; the hash is never sent to the client.
-- Exam answer keys (`isCorrect`) are stripped before questions reach a learner
-  (`sanitizeQuestionsForExamTaker`).
-- Exam scores are always recomputed server-side from the database
-  (`services/exams.ts` — `submitExamAttempt`), ignoring anything about score/pass
-  status the client might send.
-- Badges are awarded only through `checkBadgeEligibility`/`awardBadge`, called from
-  server-side services after a real DB-verified event, with a unique constraint on
-  `(badgeId, userId)` preventing duplicates.
+###Password Security
 
-## File uploads
+Passwords are hashed using bcrypt.
 
-Resumes are validated for type/size and saved via `src/lib/storage.ts`, which writes
-to `public/uploads` locally. Swap the implementation in that one file for an S3/Blob
-client to move to cloud storage — nothing else in the app needs to change.
+Plain-text passwords are never stored in the database or sent to the client.
 
-## Deployment to Vercel
+###Server-Side Authorization
 
-1. Push this repo to GitHub.
-2. Create a MySQL database (PlanetScale, Railway, AWS RDS, etc.) and copy its
-   connection string.
-3. In the Vercel project settings, set the environment variables from `.env.example`
-   (`DATABASE_URL`, `AUTH_SECRET`, `NEXTAUTH_URL` set to your deployed URL).
-4. Vercel runs `npm install`, which triggers `prisma generate` via `postinstall`.
-5. Run migrations against the production database once, from your machine or a
-   one-off Vercel deployment hook:
-   ```bash
-   npx prisma migrate deploy
-   npx prisma db seed   # optional, for demo data
-   ```
-6. Set the build command to `npm run build` (Vercel's Next.js preset does this by
-   default).
+Role permissions are verified on the server for protected API operations.
 
-Local file storage (`public/uploads`) does not persist on Vercel's serverless
-filesystem between deploys — swap `src/lib/storage.ts` for a cloud storage provider
-before relying on resume uploads in production.
+The frontend only controls the user interface; it is not treated as the security boundary.
+
+###Secure Exam Scoring
+
+Exam scores are calculated on the server.
+
+The client cannot override:
+
+Score
+Pass/fail status
+
+The correct answers are never exposed to the learner.
+
+###Exam Answer Protection
+
+Answer keys are removed before exam questions are returned to the exam-taking interface.
+
+###Duplicate Badge Prevention
+
+Badges are awarded only after server-side eligibility checks.
+
+A database uniqueness constraint on:
+
+(badgeId, userId)
+
+prevents duplicate badge awards.
+
+###Validation
+
+User input is validated using Zod on both the client and server where applicable.
+
+###File Uploads
+
+Resume uploads are handled through:
+
+src/lib/storage.ts
+
+The current implementation validates the uploaded file and stores it locally under:
+
+public/uploads
+
+The storage abstraction is designed so that the implementation can later be replaced with a cloud storage provider such as Amazon S3 or another object-storage service.
