@@ -2,7 +2,6 @@
 
 EmpForge is an internal employee-lifecycle platform that brings **recruitment, intern onboarding, courses and training, assignments, exams, badges, and an internal community feed** into a single Next.js application backed by MySQL.
 
----
 
 ## Features
 
@@ -73,7 +72,6 @@ Permissions are enforced on the server for every protected API operation.
 
 The UI hides unauthorized features for a better user experience, but the actual security boundary is enforced through server-side authorization.
 
----
 
 ## Tech Stack
 
@@ -91,7 +89,6 @@ The UI hides unauthorized features for a better user experience, but the actual 
 | Zod | Client and server validation |
 | Vitest | Business-logic testing |
 
----
 
 ## Architecture
 
@@ -134,3 +131,152 @@ The UI hides unauthorized features for a better user experience, but the actual 
                     ┌─────────────────────┐
                     │        MySQL        │
                     └─────────────────────┘
+```
+
+## Role Permissions
+
+### ADMIN
+
+Full access to:
+
+- Users
+- Jobs
+- Candidates
+- Employees
+- Courses
+- Assignments
+- Exams
+- Badges
+- Reports
+- Community moderation
+
+### RECRUITER
+
+Can manage:
+
+- Job postings
+- Applications
+- Candidate pipeline
+- Interviews
+- Candidate conversion to employee/intern
+
+### EMPLOYEE
+
+Can access:
+
+- Published courses
+- Assigned training
+- Exams
+- Results
+- Badges
+- Community
+
+### INTERN
+
+Can access:
+
+- Assigned training
+- Exams
+- Results
+- Badges
+- Community
+
+All protected write operations are re-validated on the server using the authorization utilities in:
+
+```text
+src/lib/permissions.ts
+```
+
+## Security
+
+EmpForge implements several server-side security measures.
+
+### Password Security
+
+Passwords are hashed using bcrypt.
+
+Plain-text passwords are never stored in the database or sent to the client.
+
+### Server-Side Authorization
+
+Role permissions are verified on the server for protected API operations.
+
+The frontend only controls the user interface; it is not treated as the security boundary.
+
+### Secure Exam Scoring
+
+Exam scores are calculated on the server.
+
+The client cannot override:
+
+- Score
+- Pass/fail status
+
+The correct answers are never exposed to the learner.
+
+### Exam Answer Protection
+
+Answer keys are removed before exam questions are returned to the exam-taking interface.
+
+### Duplicate Badge Prevention
+
+Badges are awarded only after server-side eligibility checks.
+
+A database uniqueness constraint on:
+
+```text
+(badgeId, userId)
+```
+
+prevents duplicate badge awards.
+
+### Validation
+
+User input is validated using Zod on both the client and server where applicable.
+
+
+## File Uploads
+
+Resume uploads are handled through:
+
+```text
+src/lib/storage.ts
+```
+
+The current implementation validates the uploaded file and stores it locally under:
+
+```text
+public/uploads
+```
+
+The storage abstraction is designed so that the implementation can later be replaced with a cloud storage provider such as Amazon S3 or another object-storage service.
+
+## Future Improvements
+
+Potential future improvements include:
+
+- Cloud-based resume storage
+- Email notifications for recruitment and interview scheduling
+- Advanced analytics and recruitment reports
+- Real-time community notifications
+- Employee performance tracking
+- Calendar integration for interviews
+- More comprehensive automated testing
+- CI/CD pipeline for automated testing and deployment
+
+## Project Highlights
+
+EmpForge demonstrates the implementation of:
+
+- Full-stack development with Next.js
+- REST-style API route handlers
+- Role-based access control
+- Authentication and authorization
+- Relational database design
+- Prisma ORM
+- Server-side validation
+- Secure exam evaluation
+- Business-logic service layers
+- File upload handling
+- Automated testing with Vitest
+- Production deployment considerations
