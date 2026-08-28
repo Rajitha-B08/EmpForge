@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { checkBadgeEligibility } from "@/services/badges";
 import { markAssignmentStarted } from "@/services/courses";
@@ -35,7 +36,7 @@ export async function submitExamAttempt(
   let totalMarks = 0;
   let scoredMarks = 0;
 
-  const answerRows = [];
+  const answerRows: Prisma.AttemptAnswerCreateManyInput[] = [];
   for (const question of attempt.exam.questions) {
     totalMarks += question.marks;
     const given = answers.find((a) => a.questionId === question.id);
