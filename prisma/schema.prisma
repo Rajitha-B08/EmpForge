@@ -66,6 +66,7 @@ model User {
   assignments     Assignment[]
 
   @@index([role])
+  @@map("user")
 }
 
 model Job {
@@ -80,6 +81,7 @@ model Job {
   applications Application[]
 
   @@index([status])
+  @@map("job")
 }
 
 model Candidate {
@@ -94,6 +96,7 @@ model Candidate {
   applications Application[]
 
   @@index([email])
+  @@map("candidate")
 }
 
 model Application {
@@ -113,6 +116,7 @@ model Application {
   @@index([jobId])
   @@index([candidateId])
   @@index([stage])
+  @@map("application")
 }
 
 model Interview {
@@ -129,6 +133,7 @@ model Interview {
   interviewer User        @relation("Interviewer", fields: [interviewerId], references: [id])
 
   @@index([applicationId])
+  @@map("interview")
 }
 
 model Employee {
@@ -151,6 +156,7 @@ model Employee {
 
   @@index([status])
   @@index([type])
+  @@map("employee")
 }
 
 model Course {
@@ -166,6 +172,7 @@ model Course {
   assignments Assignment[]
 
   @@index([published])
+  @@map("course")
 }
 
 model CourseModule {
@@ -179,6 +186,7 @@ model CourseModule {
   lessons Lesson[]
 
   @@index([courseId])
+  @@map("coursemodule")
 }
 
 model Lesson {
@@ -196,6 +204,7 @@ model Lesson {
   progress LessonProgress[]
 
   @@index([moduleId])
+  @@map("lesson")
 }
 
 model LessonProgress {
@@ -210,6 +219,7 @@ model LessonProgress {
 
   @@unique([lessonId, userId])
   @@index([userId])
+  @@map("lessonprogress")
 }
 
 model Assignment {
@@ -227,6 +237,7 @@ model Assignment {
   @@unique([courseId, userId])
   @@index([userId])
   @@index([status])
+  @@map("assignment")
 }
 
 model Exam {
@@ -244,6 +255,7 @@ model Exam {
   attempts  Attempt[]
 
   @@index([courseId])
+  @@map("exam")
 }
 
 model Question {
@@ -258,6 +270,7 @@ model Question {
   answers AttemptAnswer[]
 
   @@index([examId])
+  @@map("question")
 }
 
 model QuestionOption {
@@ -270,6 +283,7 @@ model QuestionOption {
   answers  AttemptAnswer[]
 
   @@index([questionId])
+  @@map("questionoption")
 }
 
 model Attempt {
@@ -288,6 +302,7 @@ model Attempt {
 
   @@index([userId])
   @@index([examId])
+  @@map("attempt")
 }
 
 model AttemptAnswer {
@@ -301,6 +316,7 @@ model AttemptAnswer {
   selectedOption QuestionOption? @relation(fields: [selectedOptionId], references: [id])
 
   @@unique([attemptId, questionId])
+  @@map("attemptanswer")
 }
 
 model Badge {
@@ -314,6 +330,7 @@ model Badge {
   updatedAt   DateTime @updatedAt
 
   userBadges UserBadge[]
+  @@map("badge")
 }
 
 model UserBadge {
@@ -327,6 +344,7 @@ model UserBadge {
 
   @@unique([badgeId, userId])
   @@index([userId])
+  @@map("userbadge")
 }
 
 model Post {
@@ -341,6 +359,7 @@ model Post {
   likes    Like[]
 
   @@index([createdAt])
+  @@map("post")
 }
 
 model Comment {
@@ -355,6 +374,7 @@ model Comment {
   author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
   @@index([postId])
+  @@map("comment")
 }
 
 model Like {
@@ -367,4 +387,5 @@ model Like {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([postId, userId])
+  @@map("like")
 }
