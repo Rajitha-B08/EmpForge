@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+:root {
+  /* soft cool-gray background so white cards actually read as elevated */
+  --background: 210 20% 97%;
+  --foreground: 215 30% 15%;
+
+  /* deep teal-green: reads as "growth / people development", not generic SaaS blue */
+  --primary: 168 45% 24%;
+  --primary-foreground: 0 0% 100%;
+
+  --muted: 210 20% 93%;
+  --muted-foreground: 215 15% 42%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 215 30% 15%;
+
+  --border: 214 18% 87%;
+
+  --destructive: 4 65% 46%;
+  --destructive-foreground: 0 0% 100%;
+
+  /* reserved for earned badges only - a small warm accent that means "achieved" */
+  --accent-gold: 39 62% 51%;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
